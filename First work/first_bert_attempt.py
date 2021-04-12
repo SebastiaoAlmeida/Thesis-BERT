@@ -57,6 +57,9 @@ print(data.head())
 
 data = data.rename(columns={"V.Mean.Sum":"Valence","A.Mean.Sum":"Arousal"})
 
-print(data.head())s
+print(data.head())
+print(data.shape)
 
+#Checking for nuls
+data.info()
 #%%
