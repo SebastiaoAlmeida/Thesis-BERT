@@ -92,6 +92,37 @@ data = norm1.append(norm2,ignore_index=True,)
 #%%
 data.to_csv("First_Dataset.csv",index=False)
 #%%
+n = 0
+train_len = int(0.8*len(data))
+valid_len = int(0.1*len(data))
+test_len = int(0.1*len(data))
+
+while sum([train_len,valid_len,test_len]) != len(data):
+    if sum([train_len,valid_len,test_len]) > len(data):
+        train_len -=1
+    else:
+        train_len +=1
+#%%
+data = data.sample(frac=1).reset_index(drop=True)
+print(data)
+train_data = data[:train_len]
+test_data = data[train_len:train_len+test_len]
+valid_data = data[train_len+test_len:]
+
+#%%
+print(os.getcwd())
+#%%
+print(train_len)
+print(train_data.shape)
+print(test_len)
+print(test_data.shape)
+print(valid_len)
+print(valid_data.shape)
+#%%
+train_data.to_csv("First_Dataset_Train.csv",index=False)
+test_data.to_csv("First_Dataset_Test.csv",index=False)
+valid_data.to_csv("First_Dataset_Valid.csv",index=False)
+#%%
 print(data.info())
 loaded_data= pd.read_csv("First_Dataset.csv")
 print(loaded_data.info())
