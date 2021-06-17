@@ -23,6 +23,8 @@ import random
 
 from sklearn.model_selection import train_test_split
 
+import matplotlib.pyplot as plt
+
 #%%
 nas = ['-1.#IND', '1.#QNAN', '1.#IND', '-1.#QNAN', '#N/A N/A', '#N/A', 'N/A', 'n/a', 'NA', '', '#NA', 'NaN', '-NaN', '']
 #%%
@@ -115,6 +117,11 @@ data15 = pd.read_excel("../Datasets/First Attempts/Raw/15.xlsx",usecols=["Ita_Wo
 data15 = data15.rename(columns={"M_Val":"Valence","M_Aro":"Arousal","Ita_Word":"Word/Sentence"})
 data15norm = normalize_val_aro_tocresc01(data15,1,9,"crescent")
 #%%
+data16 = pd.read_csv("../Datasets/First Attempts/Raw/16.csv",na_values=nas,usecols=["sentence","Valence","Arousal"],keep_default_na=False,encoding="utf-8")
+data16 = data16.rename(columns={"sentence":"Word/Sentence"})
+data16norm = normalize_val_aro_tocresc01(data16,1,5,"crescent")
+
+#%%
 #print(data1)
 #print(data1norm)
 #print(data2)
@@ -148,7 +155,7 @@ data15norm = normalize_val_aro_tocresc01(data15,1,9,"crescent")
 
 processed_datasets = [data1norm,data2norm,data3norm,data4norm,data5norm,data6norm,
                       data8norm,data9norm,data10norm,data11norm,data12norm,data13norm,
-                      data14norm,data15norm]
+                      data14norm,data15norm,data16norm]
 #%%
 fold1, fold2 = train_test_split(data1norm, test_size=0.5)
 for dataset in processed_datasets[1:]:
@@ -170,5 +177,61 @@ print(fold2.shape)
 print(fold1)
 
 #%%
-fold1.to_csv("../Processed/fold1.csv", encoding="utf-8") 
-fold2.to_csv("../Processed/fold2.csv", encoding="utf-8") 
+print(os.getcwd())
+#%%
+fold1.to_csv("../Datasets/First Attempts/Processed/fold1.csv", index = False,encoding="utf-8") 
+fold2.to_csv("../Datasets/First Attempts/Processed/fold2.csv", index = False,encoding="utf-8") 
+
+#%%
+
+#%%
+print(fold1["Word/Sentence"].map(len))
+print(type(fold1["Word/Sentence"].map(len)))
+print(fold1["Word/Sentence"].map(len))
+#%%
+t = fold1["Word/Sentence"].map(len).sort_values()
+
+#%%
+nas = ['-1.#IND', '1.#QNAN', '1.#IND', '-1.#QNAN', '#N/A N/A', '#N/A', 'N/A', 'n/a', 'NA', '', '#NA', 'NaN', '-NaN', '']
+
+fold1 = pd.read_csv("../Datasets/First Attempts/Processed/fold1.csv",na_values=nas,keep_default_na=False)
+fold2 = pd.read_csv("../Datasets/First Attempts/Processed/fold2.csv",na_values=nas,keep_default_na=False)
+
+#%%
+print(sum(fold1["Word/Sentence"].map(len)>512))
+print(sum(fold2["Word/Sentence"].map(len)>512))
+#%%
+plt.scatter(np.arange(0,len(fold1),1),fold1["Word/Sentence"].map(len).sort_values())
+#%%
+plt.scatter(np.arange(0,len(fold2),1),fold2["Word/Sentence"].map(len).sort_values())
+
+
+
+#%%
+#Here I will truncate the sentences
+fold1["Word/Sentence"] = fold1["Word/Sentence"].str.slice(0,512)
+fold2["Word/Sentence"] = fold2["Word/Sentence"].str.slice(0,512)
+
+#%%
+#Write the datasets again
+fold1.to_csv("../Datasets/First Attempts/Processed/fold1.csv", index = False,encoding="utf-8") 
+fold2.to_csv("../Datasets/First Attempts/Processed/fold2.csv", index = False,encoding="utf-8") 
+
+#%%
+#Testing how much we lose on certain length thresholds, for fold 1
+for t in [400,350,300,250,225,200,175,150,125,100]:
+    print(sum(fold1["Word/Sentence"].map(len)>t))
+#%%
+#Now for fold 2     
+for t in [400,350,300,250,225,200,175,150,125,100]:
+    print(sum(fold2 ["Word/Sentence"].map(len)>t))
+    
+#%%
+lengths = fold1["Word/Sentence"].str.len()
+argmax = np.where(lengths == lengths.max())[0]
+print(fold1.iloc[argmax])
+
+#%%
+lengths = fold2["Word/Sentence"].str.len()
+argmax = np.where(lengths == lengths.max())[0]
+print(fold2.iloc[argmax])
